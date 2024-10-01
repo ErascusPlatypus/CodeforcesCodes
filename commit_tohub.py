@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 
 # Change this to the path where your "Codeforces" folder is located
 REPO_PATH = "D:\Programming\Templates\CodeforcesCodes"
-
 # Change this to your GitHub repository URL
 GITHUB_REPO = "git@github.com:ErascusPlatypus/CodeforcesCodes.git"
 
@@ -23,7 +22,6 @@ end_date = datetime(2025, 1, 31)
 # Generate commit dates (3-7 commits per day)
 commit_dates = []
 current_date = start_date
-
 while current_date <= end_date:
     commits_today = random.randint(3, 7)  # Random commits per day
     for _ in range(commits_today):
@@ -41,22 +39,23 @@ index = 0
 for commit_time in commit_dates:
     if index >= len(all_files):  
         break  # Stop if all files are committed
-
+    
     # Select 1–3 files to commit together
-    num_files = random.randint(1, 3)
+    num_files = min(random.randint(1, 3), len(all_files) - index)
     files_to_commit = all_files[index : index + num_files]
     index += num_files  # Move index
-
+    
     # Add files to Git
     subprocess.run(["git", "add"] + files_to_commit)
-
-    # Format commit date
-    commit_date_str = commit_time.strftime("%Y-%m-%d %H:%M:%S")
-    env = {
-        "GIT_COMMITTER_DATE": commit_date_str,
-        "GIT_AUTHOR_DATE": commit_date_str,
-    }
-
+    
+    # Format commit date with timezone
+    commit_date_str = commit_time.strftime("%Y-%m-%d %H:%M:%S +0000")
+    
+    # Set up environment with date information
+    env = os.environ.copy()
+    env["GIT_COMMITTER_DATE"] = commit_date_str
+    env["GIT_AUTHOR_DATE"] = commit_date_str
+    
     # Make commit
     subprocess.run(
         ["git", "commit", "-m", f"Added {len(files_to_commit)} Codeforces solutions"],
@@ -65,5 +64,4 @@ for commit_time in commit_dates:
 
 # Push changes to GitHub
 subprocess.run(["git", "push", "origin", "main"])
-
 print("All files committed with backdated timestamps and pushed successfully!")
